@@ -1,0 +1,44 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isParent() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == "google.com";
+    }
+
+    function ownsParentField(data) {
+      return isParent() && data.parentId == request.auth.uid;
+    }
+
+    function keepsSameOwner() {
+      return ownsParentField(resource.data)
+        && request.resource.data.parentId == resource.data.parentId;
+    }
+
+    match /children/{childId} {
+      allow create: if ownsParentField(request.resource.data);
+      allow read, delete: if ownsParentField(resource.data);
+      allow update: if keepsSameOwner();
+    }
+
+    match /behaviorLogs/{logId} {
+      allow create: if ownsParentField(request.resource.data);
+      allow read, delete: if ownsParentField(resource.data);
+      allow update: if keepsSameOwner();
+    }
+
+    match /childAccess/{accessCode} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if ownsParentField(request.resource.data);
+      allow update: if ownsParentField(resource.data)
+        && request.resource.data.parentId == resource.data.parentId;
+      allow delete: if ownsParentField(resource.data);
+    }
+  }
+}
