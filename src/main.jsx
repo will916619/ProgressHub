@@ -131,7 +131,7 @@ function FirebaseSetupNotice() {
     </main>
   );
 }
-
+     
 function AuthScreen({ route, onNavigate, onChildLogin }) {
   const [message, setMessage] = useState('');
   const [childCode, setChildCode] = useState('');
