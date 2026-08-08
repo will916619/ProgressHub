@@ -148,7 +148,7 @@ function AuthScreen({ route, onNavigate, onChildLogin }) {
       setMessage(readableAuthError(error));
     }
   }
-
+      
   async function handleChildLogin(event) {
     event.preventDefault();
     setChildMessage('');
